@@ -7,15 +7,17 @@ from edgeimpulse_ota.TensorData import TensorData
 from edgeimpulse_ota.Quantization import Quantization
 
 
-def serve(zip: str | bytes = None, api_key: str = None, project_id: str = None, **kwargs):
+def serve(zip: str | bytes = None, api_key: str = None, project_id: str = None, library: InputLibrary = None, **kwargs):
     """
     Convert model's weights to OTA patch
     :param zip: if str, it is interpreted as a path to a local file. If bytes, it is interpreted as the zip contents
     :param api_key: Edge Impulse API key
     :param project_id: Edge Impulse project ID
+    :param library:
     :return:
     """
-    library = InputLibrary(zip=zip, api_key=api_key, project_id=project_id, **kwargs)
+    if library is None:
+        library = InputLibrary(zip=zip, api_key=api_key, project_id=project_id, **kwargs)
 
     with zipfile.ZipFile(BytesIO(library.bytes), "r") as zip:
         for info in zip.infolist():

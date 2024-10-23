@@ -1,6 +1,10 @@
 import re
+from collections import namedtuple
 from struct import pack
-from typing import Generator
+from typing import Generator, Iterable
+
+
+Quant = namedtuple("Quantization", "index, size, scale, zero")
 
 
 class Quantization:
@@ -20,15 +24,22 @@ class Quantization:
         scales = re.findall(r'TfArray<(\d+), float> quant(\d+)_scale = \{ \d+, \{([\s\S]+?)}', contents)
         zeros = re.findall(r'TfArray<(\d+), int> quant(\d+)_zero = \{ \d+, \{([\s\S]+?)}', contents)
         assert len(scales) > 0, "Can't find quantization data"
+        assert len(scales) == len(zeros), "quantization data size mismatch"
 
-        self.scales = [(int(index), eval(size), eval_data(data, float)) for size, index, data in scales]
-        self.zeros = [eval_data(data, int) for size, index, data in zeros]
-
-        assert len(self.scales) == len(self.zeros), f"quantization data size mismatch ({len(self.scales)} scales vs {len(self.zeros)} zeros)"
+        self.quants = [
+            Quant(index=int(index), size=eval(size), scale=eval_data(s, float), zero=eval_data(z, int))
+            for (size, index, s), (_, _, z) in zip(scales, zeros)
+        ]
+        # self.scales = [(int(index), eval(size), eval_data(data, float)) for size, index, data in scales]
+        # self.zeros = [eval_data(data, int) for size, index, data in zeros]
 
     @property
     def bytes_size(self) -> int:
         return len(self.bytes)
+
+    @property
+    def iterator(self) -> Iterable:
+        return self.quants
 
     @property
     def bytes(self):
@@ -38,17 +49,8 @@ class Quantization:
         """
         packs = []
 
-        for (index, size, scale), zero in zip(self.scales, self.zeros):
-            data = [x for pair in zip(scale, zero) for x in pair]
-            packs.append(pack(f">BH{'fi' * len(scale)}", index, size, *data))
+        for quant in self.iterator:
+            data = [x for pair in zip(quant.scale, quant.zero) for x in pair]
+            packs.append(pack(f">BH{'fi' * len(quant.scale)}", quant.index, quant.size, *data))
 
         return b"".join(packs)
-
-    @property
-    def patches(self) -> Generator:
-        """
-        Generate code to patch quantization data.
-        :return:
-        """
-        for index, size, _ in self.scales:
-            yield f"""if (!ei_patch_tensor_quantization(stream, {index}, {size})) return false;"""

@@ -3,7 +3,7 @@ from edgeimpulse_ota import serve
 
 if __name__ == '__main__':
     # local file
-    ota_payload, size = serve(zip="data/ei.zip")
+    ota_payload, size = serve(zip="data/fomo-dumb.zip")
     print(f"const uint8_t ota[{size}] = {{", ", ".join("%d" % b for b in ota_payload), "}")
 
     with open("data/ota.bin", "wb") as f:

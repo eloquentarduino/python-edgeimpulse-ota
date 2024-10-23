@@ -3,7 +3,7 @@ from edgeimpulse_ota import patch
 
 if __name__ == '__main__':
     # local file
-    patched_zip = patch(zip="data/ei.zip")
+    patched_zip = patch(zip="data/fomo-dumb.zip")
 
     with open("data/ei.patched.zip", "wb") as f:
         f.write(patched_zip)
