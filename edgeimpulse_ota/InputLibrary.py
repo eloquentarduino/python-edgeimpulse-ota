@@ -88,7 +88,7 @@ class InputLibrary:
 
                     for pattern, replacement_function in replacements.items():
                         if matches(filename, pattern):
-                            contents = replacement_function(contents.decode())
+                            contents = replacement_function(contents.decode(), self)
                             break
 
                     dest.writestr(info, contents)
