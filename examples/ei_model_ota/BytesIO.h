@@ -3,10 +3,10 @@
 /**
  * In-memory Stream (inspired from Python's BytesIO)
  */
-
 class BytesIO : public Stream {
   public:
-    BytesIO(const uint8_t *c, size_t l) : contents(c), len(l), i(0) {}
+    BytesIO(const uint8_t *contents_, size_t len_) :
+        i(0), len(len_), contents(contents_) {}
 
     int available() {
       return len - i;
@@ -17,18 +17,10 @@ class BytesIO : public Stream {
     }
 
     size_t readBytes(uint8_t *buf, size_t n) {
-      size_t j = 0;
+      while (available() && n > 0)
+        buf[--n] = read();
 
-      while (available() && j < n) {
-#ifdef EI_OTA_SWAP_BYTES
-        buf[j] = read();
-#else
-        buf[n - j - 1] = read();
-#endif
-        j++;
-      }
-
-      return j;
+      return 0;
     }
 
     // Stream compatibility

@@ -4,7 +4,7 @@ from distutils.core import setup
 setup(
     name='edgeimpulse_ota',
     packages=['edgeimpulse_ota'],
-    version='1.0.2',
+    version='1.0.3',
     license='MIT',
     description='OTA updates for Edge Impulse models',
     author='Simone Salerno',
