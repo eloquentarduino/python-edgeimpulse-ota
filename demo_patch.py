@@ -3,9 +3,9 @@ from edgeimpulse_ota import patch
 
 if __name__ == '__main__':
     # local file
-    patched_zip = patch(zip="data/fomo-dumb.zip")
+    patched_zip = patch(zip="data/fomo-dumb-no-ota.zip")
 
-    with open("data/ei.patched.zip", "wb") as f:
+    with open("examples/ei_model_ota/fomo-dumb-ota.zip", "wb") as f:
         f.write(patched_zip)
 
     # API
@@ -13,6 +13,6 @@ if __name__ == '__main__':
     project_id = "508852"
     patched_api = patch(api_key=api_key, project_id=project_id, engine="tflite-eon")
 
-    with open("data/ei.patched-api.zip", "wb") as f:
+    with open("data/fomo-dumb-ota-api.zip", "wb") as f:
         f.write(patched_api)
 

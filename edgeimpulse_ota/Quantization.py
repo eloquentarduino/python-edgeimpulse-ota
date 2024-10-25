@@ -27,11 +27,14 @@ class Quantization:
         assert len(scales) == len(zeros), "quantization data size mismatch"
 
         self.quants = [
-            Quant(index=int(index), size=eval(size), scale=eval_data(s, float), zero=eval_data(z, int))
-            for (size, index, s), (_, _, z) in zip(scales, zeros)
+            Quant(index=int(index1), size=eval(size1), scale=eval_data(s, float), zero=eval_data(z, int))
+            if index1 == index2 and size1 == size2 else None
+            for (size1, index1, s), (size2, index2, z) in zip(scales, zeros)
         ]
-        # self.scales = [(int(index), eval(size), eval_data(data, float)) for size, index, data in scales]
-        # self.zeros = [eval_data(data, int) for size, index, data in zeros]
+
+        for quant in self.quants:
+            assert quant is not None, "quantization failed to match"
+            assert len(quant.scale) == len(quant.zero), f"quantization data size mismatch at index {quant.index}"
 
     @property
     def bytes_size(self) -> int:
